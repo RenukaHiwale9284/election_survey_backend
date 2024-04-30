@@ -1,0 +1,122 @@
+#java pipeline
+parameters:
+    - name: ENVVG
+      displayName: select Environment To Deploy
+      type: string
+      default: UAT
+      values:
+          - UAT
+          #- PROD
+
+trigger:
+- main
+
+#DEFINE VARIABLES
+variables:
+- name: build_agent_pool
+  value: windows-latest
+- name: build_content_path
+  value: "$(Build.SourcesDirectory)"
+
+- name: env
+  ${{ if eq(parameters.ENVVG, 'UAT') }}:
+    value: UAT
+  ${{ if eq(parameters.ENVVG, 'PROD') }}:
+    value: PROD
+
+- name: DB_HOST
+  value: $(${{ parameters.ENVVG }}_DB_HOST)
+- name: DB_USERNAME
+  value: $(${{ parameters.ENVVG }}_DB_USERNAME)
+- name: DB_PASSWORD
+  value: $(${{ parameters.ENVVG }}_DB_PASSWORD)
+- name: DB_NAME
+  value: $(${{ parameters.ENVVG }}_DB_NAME)
+- name: BACKEND_URL
+  value: $(${{ parameters.ENVVG }}_BACKEND_URL)
+
+
+
+- group: election_commission_survey_group
+
+
+stages:
+    - stage: BUILD
+      displayName: 'Build ${{ parameters.ENVVG }}'
+      pool:
+        vmImage: $(build_agent_pool)
+      jobs:
+          - job: Build
+            displayName: "Build Backend"
+            workspace:
+             clean: all
+            steps:
+              - checkout: self
+              # - task: replacetokens@5
+              #   inputs:
+              #     rootDirectory: 
+              #     targetFiles: 'dbn.properties, db.properties'
+              #     encoding: 'auto'
+              #     tokenPattern: 'default'
+              #     writeBOM: true
+              #     actionOnMissing: 'warn'
+              #     keepToken: false
+              #     actionOnNoFiles: 'continue'
+              #     enableTransforms: false
+              #     enableRecursion: false
+              #     useLegacyPattern: false
+              #     enableTelemetry: true
+              # - task: replacetokens@5
+              #   inputs:
+              #     rootDirectory: '$(Build.SourcesDirectory)/src/main/resources'
+              #     targetFiles: 'application.yml'
+              #     encoding: 'auto'
+              #     tokenPattern: 'custom'
+              #     tokenPrefix: '@{'
+              #     tokenSuffix: '}@'
+              #     writeBOM: true
+              #     actionOnMissing: 'warn'
+              #     keepToken: false
+              #     actionOnNoFiles: 'continue'
+              #     enableTransforms: false
+              #     enableRecursion: false
+              #     useLegacyPattern: false
+              #     enableTelemetry: true
+              # - task: replacetokens@5
+              #   inputs:
+              #     rootDirectory: '$(Build.SourcesDirectory)/src/main/resources'
+              #     targetFiles: 'application.yml'
+              #     encoding: 'auto'
+              #     tokenPattern: 'rm'
+              #     writeBOM: true
+              #     actionOnMissing: 'warn'
+              #     keepToken: false
+              #     actionOnNoFiles: 'continue'
+              #     enableTransforms: false
+              #     enableRecursion: false
+              #     useLegacyPattern: false
+              #     enableTelemetry: true
+              - task: replacetokens@5
+                inputs:
+                  rootDirectory: '$(Build.SourcesDirectory)/src/main/resources'
+                  targetFiles: 'application.yml'
+                  encoding: 'auto'
+                  tokenPattern: 'doublebraces'
+                  writeBOM: true
+                  actionOnMissing: 'warn'
+                  keepToken: false
+                  actionOnNoFiles: 'continue'
+                  enableTransforms: false
+                  enableRecursion: false
+                  useLegacyPattern: false
+                  enableTelemetry: true
+
+                  
+              - script: mvn clean install
+                displayName: 'building java app'
+
+              - task: PublishPipelineArtifact@1
+                inputs:
+                  targetPath: $(build_content_path)
+                  artifactName: build_ui_$(env)
+                displayName: "Publish pipeline artifact"

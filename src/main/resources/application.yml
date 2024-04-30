@@ -1,0 +1,41 @@
+micronaut:
+  server:
+    cors:
+      enabled: true
+
+application:
+  name: electionSurvey
+  netty:
+  default:
+    allocator:
+      max-order: 3
+
+datasources:
+  default:
+    url: jdbc:sqlserver://localhost:1433
+    urltable: jdbc:sqlserver://localhost:1433
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    username: sa
+    password: 1234
+    databaseName: election_Servey
+
+
+#for azure
+#datasources:
+# default:
+#   url: jdbc:sqlserver://{{DB_HOST}};username={{DB_USERNAME}};encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
+#   urltable: jdbc:sqlserver://{{DB_HOST}};databaseName={{DB_NAME}};user=ecsdb@electioncommission;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
+#   driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#   username: {{DB_USERNAME}}
+#   password: {{DB_PASSWORD}}
+#   databaseName: {{DB_NAME}}
+  
+
+
+    
+    
+
+
+
+      
+     
